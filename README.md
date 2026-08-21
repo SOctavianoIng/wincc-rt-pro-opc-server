@@ -9,7 +9,7 @@ Todo el material está en [`conocimiento/`](conocimiento/):
 | Archivo | Descripción |
 |---|---|
 | [OPC-UA-WinCC-RT-Professional-V18.md](conocimiento/OPC-UA-WinCC-RT-Professional-V18.md) | Informe técnico: cronología, desvíos, comandos PowerShell, procedimiento limpio |
-| [CHAT-HILO-EDITADO.md](conocimiento/CHAT-HILO-EDITADO.md) | Hilo de chat condensado (sin consultas repetidas) |
+| [Chat-Resumen-OPC.md](conocimiento/Chat-Resumen-OPC.md) | Hilo de chat condensado (sin consultas repetidas) |
 | [AGENT-CONTEXT.md](conocimiento/AGENT-CONTEXT.md) | Contexto para un agente de IA |
 | [AGENT-PROMPT.md](conocimiento/AGENT-PROMPT.md) | Prompt listo para otra estación de trabajo |
 

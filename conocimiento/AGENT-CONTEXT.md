@@ -128,4 +128,4 @@ Regenerar certificado: ver sección 5.7 del informe.
 | `OPC-UA-WinCC-RT-Professional-V18.md` | Humano + agente: cronología, desvíos, comandos |
 | `AGENT-CONTEXT.md` | Este archivo: marco mental del agente |
 | `AGENT-PROMPT.md` | Prompt listo para pegar en un chat nuevo |
-| `CHAT-HILO-EDITADO.md` | Transcripción condensada del chat de resolución |
+| `Chat-Resumen-OPC.md` | Transcripción condensada del chat de resolución |

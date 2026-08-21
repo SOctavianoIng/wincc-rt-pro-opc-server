@@ -116,7 +116,7 @@ Luego dame UN solo siguiente comando o clic, no una lista de diez caminos.
 1. Abrí el repo `wincc-rt-pro-opc-server` (carpeta `conocimiento/`) o adjuntá los `.md`.
 2. Chat nuevo → pegá el bloque de arriba con «Estación actual» completa.
 3. El agente debe leer `AGENT-CONTEXT.md` y el informe **antes** de diagnosticar.
-4. Opcional: `CHAT-HILO-EDITADO.md` si necesita el hilo narrativo completo.
+4. Opcional: `Chat-Resumen-OPC.md` si necesita el hilo narrativo completo.
 
 ## Cómo usarlo en otro LLM (ChatGPT, etc.)
 

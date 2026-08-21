@@ -397,7 +397,7 @@ Failed to connect ... using given credentials.
 | `OPC-UA-WinCC-RT-Professional-V18.md` | Informe: cronología, desvíos, comandos, procedimiento limpio |
 | `AGENT-CONTEXT.md` | Marco mental del agente |
 | `AGENT-PROMPT.md` | Prompt para chat nuevo en otra PC |
-| `CHAT-HILO-EDITADO.md` | Este hilo condensado |
+| `Chat-Resumen-OPC.md` | Este hilo condensado |
 
 ---
 
