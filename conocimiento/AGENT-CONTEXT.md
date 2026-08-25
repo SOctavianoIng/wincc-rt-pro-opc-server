@@ -129,6 +129,7 @@ Regenerar certificado: ver sección 11 de `OPC-PowerShell-Diagnostico.md` (o 5.7
 |---|---|
 | `OPC-UA-WinCC-RT-Professional-V18.md` | Humano + agente: cronología, desvíos, comandos |
 | `OPC-PowerShell-Diagnostico.md` | Humano + agente: comandos PS en orden cronológico con reseña |
+| `GitHub-Chuleta.md` | Humano: clone / pull / commit / push de este repo |
 | `AGENT-CONTEXT.md` | Este archivo: marco mental del agente |
 | `AGENT-PROMPT.md` | Prompt listo para pegar en un chat nuevo |
 | `Chat-Resumen-OPC.md` | Transcripción condensada del chat de resolución |
