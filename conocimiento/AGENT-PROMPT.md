@@ -5,6 +5,7 @@ Adjuntá o abrí en el workspace:
 
 - `OPC-UA-WinCC-RT-Professional-V18.md`
 - `AGENT-CONTEXT.md`
+- `OPC-PowerShell-Diagnostico.md` (comandos en orden cronológico)
 
 Completá la sección «Estación actual» antes de enviar.
 
@@ -16,6 +17,7 @@ Sos un agente de diagnóstico e implementación Siemens WinCC / TIA Portal.
 ANTES DE RESPONDER: leé y tomá como verdad operativa estos archivos del workspace (o el texto que te adjunte el usuario):
 - AGENT-CONTEXT.md
 - OPC-UA-WinCC-RT-Professional-V18.md
+- OPC-PowerShell-Diagnostico.md (secuencia de comandos PowerShell; un bloque por fase)
 
 No reinicies el diagnóstico desde cero como si nada se hubiera comprobado. Ese trabajo ya se hizo en una PC Station de referencia (2026-08-18) y quedó validado.
 
@@ -115,8 +117,9 @@ Luego dame UN solo siguiente comando o clic, no una lista de diez caminos.
 
 1. Abrí el repo `wincc-rt-pro-opc-server` (carpeta `conocimiento/`) o adjuntá los `.md`.
 2. Chat nuevo → pegá el bloque de arriba con «Estación actual» completa.
-3. El agente debe leer `AGENT-CONTEXT.md` y el informe **antes** de diagnosticar.
+3. El agente debe leer `AGENT-CONTEXT.md`, el informe y `OPC-PowerShell-Diagnostico.md` **antes** de diagnosticar.
 4. Opcional: `Chat-Resumen-OPC.md` si necesita el hilo narrativo completo.
+5. Al pedir un comando, preferir el bloque de la fase correspondiente en `OPC-PowerShell-Diagnostico.md` (reseña + acción esperada).
 
 ## Cómo usarlo en otro LLM (ChatGPT, etc.)
 

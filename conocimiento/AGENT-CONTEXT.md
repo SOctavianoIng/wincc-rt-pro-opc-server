@@ -94,6 +94,8 @@ Estos puntos **ya están comprobados**. En otra estación, verificá si se cumpl
 
 ## 6. Comandos mínimos (copiar del informe si hace falta el bloque completo)
 
+Secuencia cronológica completa (reseña + acción esperada por comando): **`OPC-PowerShell-Diagnostico.md`**.
+
 Ruta base:
 
 `C:\Program Files (x86)\Siemens\Automation\SCADA-RT_V11\WinCC`
@@ -106,7 +108,7 @@ netstat -ano | findstr "4861"
 Get-Content "C:\Users\Public\Documents\Siemens\WinCC\OPC\UAServer\OpcUaServerWinCCPro.txt" -Tail 40
 ```
 
-Regenerar certificado: ver sección 5.7 del informe.
+Regenerar certificado: ver sección 11 de `OPC-PowerShell-Diagnostico.md` (o 5.7 del informe).
 
 ---
 
@@ -126,6 +128,7 @@ Regenerar certificado: ver sección 5.7 del informe.
 | Archivo | Para quién |
 |---|---|
 | `OPC-UA-WinCC-RT-Professional-V18.md` | Humano + agente: cronología, desvíos, comandos |
+| `OPC-PowerShell-Diagnostico.md` | Humano + agente: comandos PS en orden cronológico con reseña |
 | `AGENT-CONTEXT.md` | Este archivo: marco mental del agente |
 | `AGENT-PROMPT.md` | Prompt listo para pegar en un chat nuevo |
 | `Chat-Resumen-OPC.md` | Transcripción condensada del chat de resolución |
