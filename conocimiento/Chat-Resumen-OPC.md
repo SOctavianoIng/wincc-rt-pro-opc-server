@@ -12,8 +12,11 @@ Este archivo **mantiene el hilo** del diálogo (Usuario → Asistente), elimina 
 Documentos relacionados en esta carpeta:
 
 - `OPC-UA-WinCC-RT-Professional-V18.md` — informe técnico estructurado  
+- `OPC-PowerShell-Diagnostico.md` — secuencia de comandos (incluye §12.1 sin Runtime)  
 - `AGENT-CONTEXT.md` — marco para un agente de IA  
 - `AGENT-PROMPT.md` — prompt listo para otra estación  
+
+**Seguimiento:** §20 (2026-08-25) — otra estación con componentes ya instalados; UA pasó de Paused a Running + 4861.
 
 ---
 
@@ -434,4 +437,117 @@ Failed to connect ... using given credentials.
 
 ---
 
-*Fin del hilo editado. Para comandos adicionales y tablas de desvíos, ver `OPC-UA-WinCC-RT-Professional-V18.md`.*
+## 20. Seguimiento 2026-08-25 — otra estación: servers ya instalados
+
+**Contexto:** Runtime aún no abierto al inicio; PLC desconectado. Objetivo: saber si OPC UA/DA de WinCC están vivos e identificar ProgIDs. Documentación usada: `OPC-PowerShell-Diagnostico.md` (se agregó §12.1 atajo sin Runtime).
+
+### 20.1 Comando “¿están corriendo?” sin Runtime
+
+**Usuario:** ¿Cuál es el comando para saber si el OPC Server UA y DA de WinCC están corriendo? El Runtime todavía no está en ejecución.
+
+**Asistente:** Sin Runtime, chequear servicios + puerto UA (no `Get-Process` de HMI):
+
+```powershell
+Get-Service OpcUaServerWinCCPro, OPCServer.WinCC_SCADA -ErrorAction SilentlyContinue
+netstat -ano | findstr "4861"
+```
+
+Complemento instalación (aunque estén Stopped):
+
+```powershell
+Get-Service OpcUaServerWinCCPro, OPCServer.WinCC_SCADA -ErrorAction SilentlyContinue
+Test-Path "C:\Program Files (x86)\Siemens\Automation\SCADA-RT_V11\WinCC\OPC\UAServer\OpcUaServerWinCCPro.exe"
+Get-Item HKLM:\SOFTWARE\Classes\OPCServer.WinCC_SCADA -ErrorAction SilentlyContinue
+```
+
+DA suele quedar Stopped hasta que el Runtime lo use; `netstat 4861` no diagnostica DA.
+
+### 20.2 Hueco en la base de conocimiento
+
+**Usuario:** ¿Por qué esos comandos no están en la base de conocimientos?
+
+**Asistente:** Sí estaban, pero **repartidos** (§2.1, §5.3, §6.1–6.2, §12). Faltaba un atajo único “Runtime apagado”.
+
+**Usuario:** Agregalo.
+
+**Asistente:** En `OPC-PowerShell-Diagnostico.md` → **§12.1 Sin Runtime** (+ §12.2 smoke UA con Runtime) y mapa rápido actualizado.
+
+### 20.3 Evidencia: componentes OK, UA en Paused
+
+**Usuario:** Salida:
+
+```text
+OPCServer.WinCC_SCADA   (ProgID en Classes)
+True                    (Test-Path OpcUaServerWinCCPro.exe)
+Stopped  OPCServer.WinCC_SCADA
+Paused   OpcUaServerWinCCPro
+```
+
+**Asistente:** Instalación presente. DA Stopped = normal sin Runtime. UA **Paused** = no operativo aún. Arrancar:
+
+```powershell
+Start-Service OpcUaServerWinCCPro
+Start-Sleep 4
+Get-Service OpcUaServerWinCCPro
+netstat -ano | findstr "4861"
+```
+
+### 20.4 ¿Probar con Runtime y PLC desconectado?
+
+**Usuario:** Aunque no levante variables del PLC (desconectado), ¿puedo probar esto con Runtime en ejecución?
+
+**Asistente:** Sí. El Runtime abierto basta para probar el **servidor OPC**. Tags ligados al PLC pueden verse con mala calidad; la conexión ProgID/endpoint es la evidencia. No hace falta MPI/PLC vivos para validar el motor.
+
+### 20.5 UA Running + 4861 LISTENING
+
+**Usuario:**
+
+```text
+TCP    0.0.0.0:4861    ...    LISTENING    4452
+TCP    [::]:4861       ...    LISTENING    4452
+Running  OpcUaServerWinCCPro
+```
+
+**Asistente:** UA OK. Siguiente: UaExpert → `opc.tcp://localhost:4861` → None → TRUST SERVER CERTIFICATE. DA: OPC Expert → `OPCServer.WinCC_SCADA.1` con Runtime abierto.
+
+### 20.6 Por qué ahora fue más simple
+
+**Usuario:** Bastante más simple que en la etapa de prueba. ¿Puede ser porque se rompió la instalación en esa instancia y no levantaban los Server OPC?
+
+**Asistente:** Sí. En la referencia el setup del ISO Runtime quedó a medias (ISO desconectado al reboot de la VM) → solo `UAClient`, sin `UAServer`/servicio. Después, con motor instalado, el segundo tropiezo fue PKI corrupto (0x80004005). Aquí ProgID + exe + Running/4861 = estado post-instalación OK.
+
+### 20.7 Listar ProgIDs / nombres de servers
+
+**Usuario:** ¿Cómo sé los ProgID y nombres de los servers OPC de WinCC?
+
+**Asistente:**
+
+```powershell
+Get-ChildItem HKLM:\SOFTWARE\Classes, HKLM:\SOFTWARE\WOW6432Node\Classes -ErrorAction SilentlyContinue |
+  Where-Object { $_.PSChildName -match 'OPCServer|WinCC_SCADA|WinCC\.OPC|SimaticHMI' } |
+  Select-Object -ExpandProperty PSChildName
+
+Get-Service *OpcUa*, *WinCC*, OPCServer* -ErrorAction SilentlyContinue |
+  Select-Object Name, DisplayName, Status
+```
+
+**Usuario:** Error de pipeline vacío / comandos en orden invertido al pegar.
+
+**Asistente:** El pipeline debe ir `Get-ChildItem | Where-Object | Select-Object`. Preferir una sola línea si la consola invierte el pegado.
+
+**Usuario:** Salida incluye `OPC.SimaticHMI.CoRtHmiRTm(.1)`, `OPCServer.WinCC_SCADA(.1)`, `OPCServerAE.WinCC_SCADA(.1)`, `OPCServerHDA.WinCC_SCADA(.1)` y muchos `SimaticHMI.CoRt…` (controles).
+
+**Asistente:** Para tags Professional usar solo:
+
+| Canal | Identificador |
+|---|---|
+| OPC DA | `OPCServer.WinCC_SCADA.1` |
+| OPC A&E | `OPCServerAE.WinCC_SCADA.1` |
+| OPC HDA | `OPCServerHDA.WinCC_SCADA.1` |
+| OPC UA | `opc.tcp://localhost:4861` / servicio `OpcUaServerWinCCPro` (no ProgID) |
+
+No usar `CoRtHmiRTm` (Advanced). El resto de `SimaticHMI.CoRt…` no son servers OPC de tags.
+
+---
+
+*Fin del hilo editado (incluye seguimiento 2026-08-25). Comandos: `OPC-PowerShell-Diagnostico.md`. Informe: `OPC-UA-WinCC-RT-Professional-V18.md`.*

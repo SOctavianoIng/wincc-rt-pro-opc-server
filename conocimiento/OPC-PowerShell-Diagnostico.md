@@ -40,7 +40,7 @@ C:\Program Files (x86)\Siemens\Automation\SCADA-RT_V11\WinCC
 | 10 | Arranque fallido 0x80004005 | Evento 7023 + config del servicio |
 | 11 | Trace + log Siemens | Causa real (PKI) |
 | 12 | Regenerar certificado | Arreglo que dejó Running + LISTENING |
-| 13 | Comprobación viva UA | Estado final del servidor |
+| 13 | Sin Runtime / smoke UA+DA | §12.1–12.2: servicios, ProgID, puerto (Runtime puede estar apagado) |
 | 14 | Cliente / rejected | Solo si el cliente deja cert en rejected |
 
 ---
@@ -368,7 +368,33 @@ Si `$env:USERDOMAIN\$env:USERNAME` no aplica (cuenta Microsoft / AzureAD), usar 
 
 ---
 
-## 12. Comprobación rápida “¿está vivo UA?”
+## 12. Comprobación rápida UA + DA
+
+### 12.1 Sin Runtime en ejecución (atajo)
+
+> Usar cuando el HMI/Runtime **aún no** está abierto. Distingue *instalado/servicio* de *operativo con tags*.
+
+```powershell
+Get-Service OpcUaServerWinCCPro, OPCServer.WinCC_SCADA -ErrorAction SilentlyContinue
+netstat -ano | findstr "4861"
+Test-Path "C:\Program Files (x86)\Siemens\Automation\SCADA-RT_V11\WinCC\OPC\UAServer\OpcUaServerWinCCPro.exe"
+Get-Item HKLM:\SOFTWARE\Classes\OPCServer.WinCC_SCADA -ErrorAction SilentlyContinue
+```
+
+**Reseña:**
+
+| Resultado | Significado |
+|---|---|
+| `OpcUaServerWinCCPro` = **Running** + `4861` LISTENING | Motor UA arriba (sin Runtime aún no prueba tags) |
+| `OpcUaServerWinCCPro` = Stopped / sin servicio | Motor apagado o no instalado |
+| `OPCServer.WinCC_SCADA` Stopped o ausente | Normal sin Runtime; DA suele arrancar cuando el Runtime lo usa |
+| `Test-Path` = `True` | Exe UA presente en disco |
+| `Get-Item` ProgID con salida | DA Professional registrado en COM |
+| Sin match / `False` / sin objeto | Falta componente del ISO Runtime Professional |
+
+**Acción esperada:** con componentes instalados, al menos existen el servicio UA y el ProgID DA (aunque DA esté Stopped). Para tags, abrir Runtime y pasar a 12.2 / clientes (§15).
+
+### 12.2 Con Runtime — ¿está vivo UA?
 
 ```powershell
 Get-Service OpcUaServerWinCCPro
@@ -383,6 +409,8 @@ netstat -ano | findstr "4861"
 Running  OpcUaServerWinCCPro
 TCP    0.0.0.0:4861    ...    LISTENING
 ```
+
+Para DA con Runtime abierto: ProgID `OPCServer.WinCC_SCADA.1` en OPC Expert (no se diagnostica con `netstat 4861`).
 
 ---
 
