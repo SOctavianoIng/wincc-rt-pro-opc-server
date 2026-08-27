@@ -16,7 +16,7 @@ Documentos relacionados en esta carpeta:
 - `AGENT-CONTEXT.md` — marco para un agente de IA  
 - `AGENT-PROMPT.md` — prompt listo para otra estación  
 
-**Seguimiento:** §20 (2026-08-25) — otra estación con componentes ya instalados; UA pasó de Paused a Running + 4861.
+**Seguimiento:** §20 (2026-08-25) hilo corto; **§21 (2026-08-25/26)** tutorial — etapa definitiva PC WinCC RT V18 Server OPC UA + cliente remoto KEPServer.
 
 ---
 
@@ -550,4 +550,359 @@ No usar `CoRtHmiRTm` (Advanced). El resto de `SimaticHMI.CoRt…` no son servers
 
 ---
 
-*Fin del hilo editado (incluye seguimiento 2026-08-25). Comandos: `OPC-PowerShell-Diagnostico.md`. Informe: `OPC-UA-WinCC-RT-Professional-V18.md`.*
+## 21. Etapa definitiva — PC WinCC Runtime Professional V18: Server OPC UA operativo + cliente remoto
+
+**Tipo:** tutorial guiado (estación definitiva, 2026-08-25 / 2026-08-26).  
+**Estación WinCC (ejemplo validado):** `DESKTOP-BH0RBSV`, usuario `desktop-bh0rbsv\siemens`, IP `192.168.0.221`.  
+**Cliente remoto (ejemplo):** PC KEPServer `192.168.0.220`, misma red.  
+**Resultado:** OPC UA local (UaExpert + Trust), OPC DA (`OPCServer.WinCC_SCADA.1`), y tags MPI vivos vía KEPServer OPC UA Client → Quick Client.
+
+```text
+PLC (MPI) → WinCC RT Professional V18 (PC Station)
+              ├── OPC DA   ProgID OPCServer.WinCC_SCADA.1
+              └── OPC UA   opc.tcp://<IP-WinCC>:4861
+                           servicio OpcUaServerWinCCPro
+                                    ↓
+                         KEPServer (otra PC) → Quick Client
+```
+
+Sustituir `<IP-WinCC>` por la IPv4 real (sin símbolos `<>`). En el ejemplo: `192.168.0.221`.
+
+Comandos detallados también en `OPC-PowerShell-Diagnostico.md` (§12.1 sin Runtime, §12.2 con Runtime).
+
+---
+
+### 21.1 Objetivo de esta etapa
+
+Con el **componente servidor ya instalado** (ISO Runtime Professional → Tools → WinCC OPC UA/DA Server), dejar la PC WinCC como **servidor OPC UA definitivo** y validar:
+
+1. Motor UA Running + puerto 4861.  
+2. Cliente local UaExpert (Trust).  
+3. Cliente DA local (opcional).  
+4. Cliente remoto KEPServer en otra PC de la red.
+
+> En la estación de prueba (2026-08-18) el setup del ISO quedó a medias y luego falló el PKI. Aquí el componente ya estaba: el trabajo es **arranque, enlace al Runtime, clientes y red**.
+
+---
+
+### 21.2 Paso 1 — ¿Está instalado el servidor? (Runtime puede estar apagado)
+
+PowerShell (preferible Administrador):
+
+```powershell
+Get-Service OpcUaServerWinCCPro, OPCServer.WinCC_SCADA -ErrorAction SilentlyContinue
+netstat -ano | findstr "4861"
+Test-Path "C:\Program Files (x86)\Siemens\Automation\SCADA-RT_V11\WinCC\OPC\UAServer\OpcUaServerWinCCPro.exe"
+Get-Item HKLM:\SOFTWARE\Classes\OPCServer.WinCC_SCADA -ErrorAction SilentlyContinue
+Get-ChildItem "C:\Program Files (x86)\Siemens\Automation\SCADA-RT_V11\WinCC\OPC"
+```
+
+**Esperado (instalación OK):**
+
+| Evidencia | Lectura |
+|---|---|
+| `Test-Path` = `True` | Exe UA presente |
+| Carpetas `UAServer`, `DataAccess`, … | Servers instalados (no solo `UAClient`) |
+| ProgID `OPCServer.WinCC_SCADA` | DA Professional registrado |
+| `OpcUaServerWinCCPro` existe (Paused/Stopped/Running) | Servicio UA registrado |
+| `OPCServer.WinCC_SCADA` Stopped | Normal sin Runtime |
+
+Si falta `UAServer` o `Test-Path` es `False` → instalar desde ISO **WinCC Runtime Professional** (no ISO TIA). Ver secciones anteriores de este documento / informe.
+
+---
+
+### 21.3 Paso 2 — Identidad y ProgIDs útiles
+
+```powershell
+whoami
+hostname
+ipconfig
+
+Get-ChildItem HKLM:\SOFTWARE\Classes, HKLM:\SOFTWARE\WOW6432Node\Classes -ErrorAction SilentlyContinue |
+  Where-Object { $_.PSChildName -match 'OPCServer|WinCC_SCADA|WinCC\.OPC|SimaticHMI' } |
+  Select-Object -ExpandProperty PSChildName
+```
+
+**Usar en clientes:**
+
+| Canal | Identificador |
+|---|---|
+| OPC DA (tags) | `OPCServer.WinCC_SCADA.1` |
+| OPC A&E | `OPCServerAE.WinCC_SCADA.1` |
+| OPC HDA | `OPCServerHDA.WinCC_SCADA.1` |
+| OPC UA | `opc.tcp://localhost:4861` (local) o `opc.tcp://<IP-WinCC>:4861` (remoto) |
+
+**No usar:** `OPC.SimaticHMI.CoRtHmiRTm` / `.1` (Advanced).
+
+> Pegar el pipeline en **este orden** (`Get-ChildItem | Where-Object | Select-Object`). Preferir una sola línea si la consola invierte el pegado multilínea.
+
+---
+
+### 21.4 Paso 3 — Runtime abierto + arranque del servicio UA
+
+1. Abrir el **HMI Runtime Professional** con el proyecto cargado (pantallas/tags).  
+2. Con PLC conectado se validan valores vivos; **sin PLC** igual se puede validar el motor OPC (tags con mala calidad).  
+3. Arrancar / verificar UA:
+
+```powershell
+Start-Service OpcUaServerWinCCPro
+Start-Sleep 4
+Get-Service OpcUaServerWinCCPro
+netstat -ano | findstr "4861"
+```
+
+**Esperado:**
+
+```text
+Running  OpcUaServerWinCCPro
+TCP    0.0.0.0:4861    ...    LISTENING
+TCP    [::]:4861       ...    LISTENING
+```
+
+`0.0.0.0:4861` indica que acepta conexiones de red (no solo localhost).
+
+#### Desvío A — Servicio Running pero el log dice “no runtime project”
+
+```powershell
+Get-Content "C:\Users\Public\Documents\Siemens\WinCC\OPC\UAServer\OpcUaServerWinCCPro.txt" -Tail 30
+```
+
+Mensaje típico:
+
+```text
+ERROR: CRTIBase::GetWinCCProjectState: no runtime project was found, hr=0x80004005
+```
+
+**Solución:** el puerto puede estar LISTENING y aun así el UA **no ve** el proyecto Runtime. Con el HMI **ya cargado y estable**:
+
+```powershell
+Restart-Service OpcUaServerWinCCPro
+Start-Sleep 5
+Get-Content "C:\Users\Public\Documents\Siemens\WinCC\OPC\UAServer\OpcUaServerWinCCPro.txt" -Tail 15
+```
+
+El error periódico debe desaparecer. Recién entonces los clientes obtienen endpoints / tags.
+
+**Orden correcto de arranque:** Runtime primero → luego (re)arranque de `OpcUaServerWinCCPro`.
+
+#### Desvío B — UA en Paused / Stopped
+
+```powershell
+Start-Service OpcUaServerWinCCPro
+Start-Sleep 4
+Get-Service OpcUaServerWinCCPro
+netstat -ano | findstr "4861"
+```
+
+Si vuelve a morir con 0x80004005 / evento 7023 → trace + regenerar PKI (secciones 10–15 de este documento / `OPC-PowerShell-Diagnostico.md`). En la estación definitiva de 2026-08-26 **no** fue necesario: bastó Runtime + Start/Restart del servicio.
+
+---
+
+### 21.5 Paso 4 — Cliente local UaExpert (OPC UA)
+
+1. UaExpert en la **misma PC** que WinCC.  
+2. No esperar discovery automático en `opc.tcp://localhost:4840` (Local Discovery Server). WinCC escucha en **4861**.  
+3. En el diálogo **Add Server**:
+   - Expandir **Custom Discovery**.  
+   - **Doble clic** en `Double click to Add Server...`.  
+   - URL **sin** `@`:
+
+```text
+opc.tcp://localhost:4861
+```
+
+   - Discover / Get Endpoints.  
+   - Seleccionar el servidor Siemens y el endpoint **None**.  
+   - Authentication: **Anonymous**.  
+   - OK (se habilita solo con un endpoint seleccionado).  
+4. Connect. Ante `BadCertificateUntrusted` → **TRUST SERVER CERTIFICATE**.  
+5. Browse: tags visibles (con PLC, valores animados / calidad buena).
+
+El prefijo `@` delante del nombre en el árbol Project es **normal** (entrada custom); no se escribe a mano en Configuration Name.
+
+#### Desvíos UaExpert (soluciones)
+
+| Síntoma | Solución |
+|---|---|
+| Log: FindServers en `:4840` BadTimeout | Ignorar LDS; agregar custom en **4861** |
+| OK del Add Server en gris | Completar Custom Discovery → elegir **endpoint** None |
+| URL solo en “Configuration Name” | No alcanza; hay que Discover + seleccionar endpoint |
+| Servidor no aparece / no endpoints | Ver Desvío A (`no runtime project`) + `Restart-Service` con Runtime cargado |
+| BadCertificateUntrusted | Trust del cert del servidor (autofirmado) |
+
+---
+
+### 21.6 Paso 5 — Cliente local OPC Expert (OPC DA)
+
+Con Runtime abierto:
+
+1. OPC Expert → conectar a **`OPCServer.WinCC_SCADA.1`**.  
+2. No usar `CoRtHmiRTm`.  
+3. Browse de tags.
+
+OPC DA **no** se diagnostica con `netstat 4861`.
+
+---
+
+### 21.7 Paso 6 — Cliente remoto KEPServer (otra PC, misma red)
+
+Arquitectura de prueba validada:
+
+| Rol | IP ejemplo |
+|---|---|
+| WinCC (servidor UA) | `192.168.0.221` |
+| KEPServer (cliente) | `192.168.0.220` |
+
+#### 6.1 En PC WinCC — datos y estado
+
+```powershell
+ipconfig
+Get-Service OpcUaServerWinCCPro
+netstat -ano | findstr "4861"
+```
+
+URL para el cliente remoto:
+
+```text
+opc.tcp://192.168.0.221:4861
+```
+
+(Reemplazar por la IP actual de la PC WinCC.)
+
+#### 6.2 Firewall — solo si hace falta
+
+No es obligatorio “sí o sí”. Primero, **desde la PC de KEP**:
+
+```powershell
+Test-NetConnection 192.168.0.221 -Port 4861
+```
+
+- `TcpTestSucceeded : True` → **no** hace falta abrir firewall.  
+- `False` (con UA Running en WinCC) → en la PC WinCC permitir TCP 4861:
+
+```powershell
+New-NetFirewallRule -DisplayName "WinCC OPC UA 4861" -Direction Inbound -Protocol TCP -LocalPort 4861 -Action Allow
+```
+
+En la prueba definitiva: `TcpTestSucceeded : True` sin regla nueva.
+
+#### 6.3 En PC KEPServer — canal OPC UA Client
+
+1. KEPServerEX Configuration → **New Channel** → driver **OPC UA Client**.  
+2. **New Device** → Endpoint:
+
+```text
+opc.tcp://192.168.0.221:4861
+```
+
+3. Primera prueba (igual que UaExpert):
+
+| Parámetro | Valor |
+|---|---|
+| Security Policy | **None** |
+| Message Security Mode | **None** |
+| Authentication | **Anonymous** (preferido) |
+
+4. Si la UI exige usuario/contraseña: cuenta Windows de la PC WinCC, p. ej. `desktop-bh0rbsv\siemens` (o `.\siemens`) con su contraseña. Grupo **SIMATIC HMI** en WinCC puede ayudar.  
+5. **Trust** del certificado del servidor WinCC en el almacén de KEP (Rejected → Trusted).  
+6. Browse / importar tags.
+
+#### 6.4 Valores en tiempo real
+
+El **árbol de configuración** de KEP **no anima** valores. Usar **OPC Quick Client**:
+
+1. Abrir Quick Client.  
+2. Conectar al runtime de KEP.  
+3. Ver **Value** y **Quality** (Good + valores que cambian con el PLC).
+
+#### 6.5 Si WinCC rechaza el certificado del cliente KEP
+
+En PC WinCC:
+
+```powershell
+Get-ChildItem "C:\Program Files (x86)\Siemens\Automation\SCADA-RT_V11\WinCC\OPC\UAServer\PKI\CA\rejected"
+Copy-Item "C:\Program Files (x86)\Siemens\Automation\SCADA-RT_V11\WinCC\OPC\UAServer\PKI\CA\rejected\*" `
+  "C:\Program Files (x86)\Siemens\Automation\SCADA-RT_V11\WinCC\OPC\UAServer\PKI\CA\certs\" -Force
+```
+
+(Si `rejected` no existe o está vacío, el problema no es rechazo de cert de cliente.)
+
+En planta, tras la prueba, preferir **SignAndEncrypt** en lugar de dejar None abierto.
+
+---
+
+### 21.8 Checklist mínimo de la etapa definitiva
+
+1. `UAServer` + `Test-Path OpcUaServerWinCCPro.exe` = True.  
+2. Runtime HMI cargado → `Start-Service` / `Restart-Service OpcUaServerWinCCPro`.  
+3. Log **sin** `no runtime project was found`.  
+4. `Running` + `0.0.0.0:4861` LISTENING.  
+5. UaExpert: Custom Discovery `opc.tcp://localhost:4861` → None → Trust → tags.  
+6. (Opcional) OPC Expert DA: `OPCServer.WinCC_SCADA.1`.  
+7. Desde PC KEP: `Test-NetConnection <IP-WinCC> -Port 4861` = True.  
+8. KEP OPC UA Client → endpoint con IP → Trust → **Quick Client** con valores vivos.
+
+---
+
+### 21.9 Tabla de desvíos importantes y soluciones (esta etapa)
+
+| Desvío | Evidencia | Solución planteada |
+|---|---|---|
+| Instalación incompleta (estación de prueba) | Solo `UAClient`, sin servicio | ISO Runtime Professional desde carpeta local; casilla OPC UA Server |
+| PKI corrupto (estación de prueba) | 0x80004005, *Couldn't access certificate store* | Mover `.der`/`.pfx` a `_bak`; recrear cert; `Start-Service` |
+| UA Paused/Stopped con componente OK | `Get-Service` Paused | `Start-Service OpcUaServerWinCCPro` con Runtime abierto |
+| Puerto arriba pero sin proyecto RT | Log: `no runtime project was found` | Runtime cargado + `Restart-Service OpcUaServerWinCCPro` |
+| UaExpert no encuentra el server | Discovery en `:4840` | Custom Discovery a `:4861` |
+| OK gris en Add Server | Sin endpoint seleccionado | Doble clic Custom Add Server → Discover → endpoint None |
+| `@` ante el nombre | Árbol Project | Normal en entradas custom |
+| KEP pide user/password | Diálogo auth | Anonymous; o `PC\usuario` de WinCC |
+| Firewall | Duda al remoto | Solo si `Test-NetConnection … -Port 4861` = False |
+| Tags OK pero “no animan” en KEP | Árbol de config | Usar **OPC Quick Client** |
+| `rejected` PathNotFound | Get-ChildItem | No es fallo de cliente; otra causa (enlace RT, Trust, etc.) |
+
+---
+
+### 21.10 Bloque de comandos — copia rápida (PC WinCC)
+
+```powershell
+# Identidad
+whoami
+hostname
+ipconfig
+
+# Instalación + servicios
+Test-Path "C:\Program Files (x86)\Siemens\Automation\SCADA-RT_V11\WinCC\OPC\UAServer\OpcUaServerWinCCPro.exe"
+Get-ChildItem "C:\Program Files (x86)\Siemens\Automation\SCADA-RT_V11\WinCC\OPC"
+Get-Service OpcUaServerWinCCPro, OPCServer.WinCC_SCADA -ErrorAction SilentlyContinue
+netstat -ano | findstr "4861"
+
+# Arranque / re-enlace al Runtime
+Start-Service OpcUaServerWinCCPro
+# o, con Runtime ya cargado:
+Restart-Service OpcUaServerWinCCPro
+Start-Sleep 5
+Get-Service OpcUaServerWinCCPro
+netstat -ano | findstr "4861"
+Get-Content "C:\Users\Public\Documents\Siemens\WinCC\OPC\UAServer\OpcUaServerWinCCPro.txt" -Tail 20
+
+# ProgIDs DA Professional
+Get-ChildItem HKLM:\SOFTWARE\Classes, HKLM:\SOFTWARE\WOW6432Node\Classes -ErrorAction SilentlyContinue | Where-Object { $_.PSChildName -match 'OPCServer\.WinCC_SCADA' } | Select-Object -ExpandProperty PSChildName
+```
+
+**PC KEP (red):**
+
+```powershell
+Test-NetConnection 192.168.0.221 -Port 4861
+```
+
+**Clientes:**
+
+| Cliente | Endpoint / ProgID |
+|---|---|
+| UaExpert (local) | `opc.tcp://localhost:4861` + Trust |
+| KEPServer (remoto) | `opc.tcp://192.168.0.221:4861` + Trust → Quick Client |
+| OPC Expert (DA) | `OPCServer.WinCC_SCADA.1` |
+
+---
+
+*Fin del hilo editado (incluye seguimiento §20 y etapa definitiva §21, 2026-08-25/26). Comandos: `OPC-PowerShell-Diagnostico.md`. Informe: `OPC-UA-WinCC-RT-Professional-V18.md`.*
