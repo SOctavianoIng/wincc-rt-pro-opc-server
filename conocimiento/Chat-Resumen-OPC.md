@@ -16,7 +16,7 @@ Documentos relacionados en esta carpeta:
 - `AGENT-CONTEXT.md` — marco para un agente de IA  
 - `AGENT-PROMPT.md` — prompt listo para otra estación  
 
-**Seguimiento:** §20 (2026-08-25) hilo corto; **§21 (2026-08-25/26)** tutorial — etapa definitiva PC WinCC RT V18 Server OPC UA + cliente remoto KEPServer.
+**Seguimiento:** §20 (2026-08-25) hilo corto; **§21 (2026-08-25/26)** tutorial — etapa definitiva PC WinCC RT V18 Server OPC UA + cliente remoto KEPServer; **§22 (2026-08-27)** commissioning cliente OPC UA Ignition (SCADA en planta) → WinCC.
 
 ---
 
@@ -900,9 +900,122 @@ Test-NetConnection 192.168.0.221 -Port 4861
 | Cliente | Endpoint / ProgID |
 |---|---|
 | UaExpert (local) | `opc.tcp://localhost:4861` + Trust |
+| UaExpert (remoto / LAN) | ver §21.8 |
 | KEPServer (remoto) | `opc.tcp://192.168.0.221:4861` + Trust → Quick Client |
 | OPC Expert (DA) | `OPCServer.WinCC_SCADA.1` |
+| Ignition (SCADA / remoto) | ver **§22** (Host Override con `opc.tcp://…`) |
+
+### 21.8 UaExpert remoto (LAN) — datos validados 2026-08-27
+
+| Campo | Valor |
+|---|---|
+| Endpoint | `opc.tcp://192.168.0.221:4861` |
+| Custom Discovery | URL **sin** `@`; luego elegir endpoint **None** |
+| Usuario Windows | `desktop-bh0rbsv\siemens` |
+| Contraseña | la de la cuenta Windows **SIEMENS** (no versionar en Git) |
+| Certificado | primera vez → **TRUST SERVER CERTIFICATE** |
+
+También puede usarse **Anonymous** si el endpoint None lo permite. El prefijo `@` en Configuration Name / árbol Project es normal; no se escribe a mano. OK del Add Server se habilita solo tras **Discover + seleccionar endpoint**.
 
 ---
 
-*Fin del hilo editado (incluye seguimiento §20 y etapa definitiva §21, 2026-08-25/26). Comandos: `OPC-PowerShell-Diagnostico.md`. Informe: `OPC-UA-WinCC-RT-Professional-V18.md`.*
+## 22. Commissioning — Cliente OPC UA Ignition (SCADA) → WinCC (2026-08-27)
+
+**Tipo:** asistencia de puesta en marcha del **cliente OPC UA de Ignition** en la PC del SCADA (planta), conectado por LAN al servidor WinCC Runtime Professional.
+
+**Arquitectura:**
+
+```text
+PLC (MPI) → WinCC RT Professional (DESKTOP-BH0RBSV / 192.168.0.221)
+              └── OPC UA  opc.tcp://192.168.0.221:4861
+                          OpcUaServerWinCCPro
+                                    ↓  LAN
+                         Ignition SCADA (otra PC) — OPC UA Client
+```
+
+**Resultado:** conexión Ignition ↔ WinCC OPC UA **operativa** tras corregir **Endpoint Host Override** (ver §22.4).
+
+---
+
+### 22.1 Hitos del commissioning (orden)
+
+1. **Pull del repo** en la estación de trabajo / documentación al día.
+2. **Diagnóstico en PC WinCC:** `Get-Service OpcUaServerWinCCPro` = Running; `netstat` 4861 LISTENING (Autostart del Runtime vs servicio UA: el servicio puede estar Running aunque un `Test-NetConnection` previo en otra PC haya fallado).
+3. **Prueba LAN:** desde la PC del SCADA / laptop:
+   ```powershell
+   Test-NetConnection -ComputerName 192.168.0.221 -Port 4861
+   ```
+   `TcpTestSucceeded : True` → firewall/puerto OK; no basta para OPC UA completo.
+4. **UaExpert remoto** validado antes de Ignition:
+   - Custom Discovery → `opc.tcp://192.168.0.221:4861` (sin `@`).
+   - Endpoint **None** → Trust certificate.
+   - Usuario documentado: `desktop-bh0rbsv\siemens` (contraseña = cuenta Windows; no versionar).
+5. **KEPWare demo** dejó de servir → se prioriza **UaExpert** para prueba y **Ignition** como cliente de planta.
+6. **Ignition directo** a WinCC (sin cliente intermedio obligatorio): mismo endpoint UA; UaExpert/KEP solo fueron herramientas de prueba.
+7. **PKI en WinCC:** carpeta `rejected` podía no existir; crearla si hace falta. En esta etapa el bloqueo de Ignition **no** fue cert en `rejected`.
+8. Errores Ignition vistos en el camino (antes de la resolución final):
+   - `Bad_ConfigurationError` / `password not configured` → Auth Username sin password.
+   - `Bad_NonceInvalid` / `nonce must be at least 32 bytes` → Username (+ a menudo Security None) vs stack Milo de Ignition; UaExpert más tolerante.
+   - Ignition a veces **no ofrece Anonymous** si el endpoint no lo anuncia → valorar Username + SignAndEncrypt, habilitar Anonymous en TIA, o (mientras) puente KEP.
+9. **Resolución final:** Host Override mal formado (solo IP). Ver §22.4.
+
+---
+
+### 22.2 Datos de estación (referencia)
+
+| Rol | Valor |
+|---|---|
+| WinCC hostname | `DESKTOP-BH0RBSV` |
+| WinCC whoami | `desktop-bh0rbsv\siemens` |
+| WinCC IP | `192.168.0.221` |
+| Endpoint URL | `opc.tcp://192.168.0.221:4861` |
+| Servicio | `OpcUaServerWinCCPro` (Automatic / Running) |
+
+---
+
+### 22.3 Configuración Ignition OPC UA Client (campos clave)
+
+| Campo Ignition | Valor validado |
+|---|---|
+| Endpoint URL | `opc.tcp://192.168.0.221:4861` |
+| **Endpoint Host Override** (avanzado) | `opc.tcp://192.168.0.221:4861` ← **mismo formato URL**, no solo la IP |
+| Security (prueba) | None / None si el endpoint lo permite; o Sign / SignAndEncrypt en planta |
+| Auth | Anonymous si está disponible; si no, Username `desktop-bh0rbsv\siemens` + password Windows |
+| Certificado | Trust del cert del servidor WinCC en Ignition |
+
+---
+
+### 22.4 Resolución final — Endpoint Host Override
+
+**Síntoma:** `Test-NetConnection` al puerto 4861 OK; UaExpert OK; Ignition en **Failed** (a veces sin mensaje útil, o con errores de auth/nonce según la config).
+
+**Causa:** en opciones **avanzadas** del cliente OPC UA de Ignition, el campo **Endpoint Host Override** (Host Override) se había completado solo con la IP (`192.168.0.221`).
+
+**Arreglo que funcionó:** anteponer el esquema **igual que en Endpoint URL**:
+
+```text
+opc.tcp://192.168.0.221:4861
+```
+
+| Incorrecto (fallaba) | Correcto (OK) |
+|---|---|
+| `192.168.0.221` | `opc.tcp://192.168.0.221:4861` |
+
+> En esta puesta en marcha, ese detalle fue el que cerró la comunicación Ignition ↔ WinCC OPC UA. Documentarlo para no repetir el desvío de poner solo la IP.
+
+---
+
+### 22.5 Desvíos de esta etapa (no repetir)
+
+| Desvío | Lectura correcta |
+|---|---|
+| Solo IP en Host Override | Usar URL completa `opc.tcp://IP:4861` |
+| Culpar firewall si Test-NetConnection True | El puerto ya está abierto; mirar config Ignition / cert / auth |
+| Username vacío con modo Username | Completar password o cambiar a Anonymous |
+| Username + None → Bad_NonceInvalid | Probar Anonymous, o SignAndEncrypt; o Host Override bien formado primero |
+| Escribir `@` en Configuration Name (UaExpert) | Custom Discovery + Discover + endpoint |
+| Confundir Autostart del HMI con servicio UA | Verificar `Get-Service` + `netstat 4861` en la PC WinCC |
+
+---
+
+*Fin del hilo editado (incluye seguimiento §20, etapa definitiva §21, UaExpert remoto §21.8 y commissioning Ignition §22). Comandos: `OPC-PowerShell-Diagnostico.md`. Informe: `OPC-UA-WinCC-RT-Professional-V18.md`.*

@@ -8,6 +8,7 @@ Todo el material está en [`conocimiento/`](conocimiento/):
 
 | Archivo | Descripción |
 |---|---|
+| [Informe-Tecnico-Comunicacion-OPC-UA-WinCC-RT.md](conocimiento/Informe-Tecnico-Comunicacion-OPC-UA-WinCC-RT.md) | **Entregable cliente:** arquitectura, conexión Ignition y commissioning OPC UA |
 | [OPC-UA-WinCC-RT-Professional-V18.md](conocimiento/OPC-UA-WinCC-RT-Professional-V18.md) | Informe técnico: cronología, desvíos, comandos PowerShell, procedimiento limpio |
 | [OPC-PowerShell-Diagnostico.md](conocimiento/OPC-PowerShell-Diagnostico.md) | Comandos PowerShell en orden cronológico (reseña + acción esperada) para otra estación / agente |
 | [GitHub-Chuleta.md](conocimiento/GitHub-Chuleta.md) | Chuleta Git: clone, pull, status, commit y push (PowerShell) |
