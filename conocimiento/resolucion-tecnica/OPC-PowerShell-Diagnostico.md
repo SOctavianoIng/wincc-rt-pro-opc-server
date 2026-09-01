@@ -4,8 +4,8 @@
 
 **Para quién:** técnico en planta o agente de IA en **otra estación**. Usar junto con:
 
-- [`AGENT-PROMPT.md`](AGENT-PROMPT.md) — prompt de sesión
-- [`AGENT-CONTEXT.md`](AGENT-CONTEXT.md) — hechos cerrados y árbol de decisión
+- [`../../.rules/AGENT-PROMPT.md`](../../.rules/AGENT-PROMPT.md) — prompt de sesión
+- [`../../.rules/AGENT-CONTEXT.md`](../../.rules/AGENT-CONTEXT.md) — hechos cerrados y árbol de decisión
 - [`OPC-UA-WinCC-RT-Professional-V18.md`](OPC-UA-WinCC-RT-Professional-V18.md) — informe completo
 
 **Reglas de uso**
@@ -456,7 +456,7 @@ No mezclar: `BadCertificateUntrusted` (cliente) ≠ `Couldn't access certificate
 
 ## 16. Cómo debe usarlo el agente (otra PC)
 
-Seguir el protocolo de [`AGENT-PROMPT.md`](AGENT-PROMPT.md) y el árbol de [`AGENT-CONTEXT.md`](AGENT-CONTEXT.md):
+Seguir el protocolo de [`.rules/AGENT-PROMPT.md`](../../.rules/AGENT-PROMPT.md) y el árbol de [`.rules/AGENT-CONTEXT.md`](../../.rules/AGENT-CONTEXT.md):
 
 1. Completar «Estación actual» (`whoami`, hostname, tipo HMI, síntoma).
 2. Clasificar: **A** falta componente · **B** servicio no arranca · **C** Running pero falla cliente · **D** ProgID equivocado · **E** Runtime/MPI no sano.

@@ -2,25 +2,34 @@
 
 Base de conocimiento: exponer tags de **WinCC Runtime Professional V18** (PC Station) por **OPC DA** y **OPC UA**, validado con PLC **S7-315-2DP** vía **MPI**.
 
-## Contenido
+**Estado:** trabajo **cerrado y entregado al cliente** (agosto 2026).  
+**Versión entregada:** [`Informe-Tecnico-Comunicacion-OPC-UA-WinCC-RT (Rev.1).docx`](conocimiento/entregable/Informe-Tecnico-Comunicacion-OPC-UA-WinCC-RT%20(Rev.1).docx) (revisión manual sobre la plantilla IndustrialLAB).
 
-Todo el material está en [`conocimiento/`](conocimiento/):
+## Estructura
 
-| Archivo | Descripción |
+```
+.rules/                  Reglas y prompt para agentes de IA
+.cursor/rules/           Regla Cursor (carga el contexto de .rules/)
+conocimiento/
+  entregable/            Informe al cliente (Word Rev.1, fuente Markdown, plantilla)
+  imagenes/              Diagramas y capturas de HMI
+  resolucion-tecnica/    Markdown de diagnóstico, procedimiento, chat e inventario TIA
+  variables/             Listados y notas de tags PLC / Runtime
+```
+
+| Carpeta | Contenido |
 |---|---|
-| [Informe-Tecnico-Comunicacion-OPC-UA-WinCC-RT.md](conocimiento/Informe-Tecnico-Comunicacion-OPC-UA-WinCC-RT.md) | **Entregable cliente:** arquitectura, conexión Ignition y commissioning OPC UA |
-| [OPC-UA-WinCC-RT-Professional-V18.md](conocimiento/OPC-UA-WinCC-RT-Professional-V18.md) | Informe técnico: cronología, desvíos, comandos PowerShell, procedimiento limpio |
-| [OPC-PowerShell-Diagnostico.md](conocimiento/OPC-PowerShell-Diagnostico.md) | Comandos PowerShell en orden cronológico (reseña + acción esperada) para otra estación / agente |
-| [GitHub-Chuleta.md](conocimiento/GitHub-Chuleta.md) | Chuleta Git: clone, pull, status, commit y push (PowerShell) |
-| [Chat-Resumen-OPC.md](conocimiento/Chat-Resumen-OPC.md) | Hilo de chat condensado (sin consultas repetidas) |
-| [AGENT-CONTEXT.md](conocimiento/AGENT-CONTEXT.md) | Contexto para un agente de IA |
-| [AGENT-PROMPT.md](conocimiento/AGENT-PROMPT.md) | Prompt listo para otra estación de trabajo |
+| [.rules/](.rules/) | [Contexto del agente](.rules/AGENT-CONTEXT.md) · [prompt de sesión](.rules/AGENT-PROMPT.md) |
+| [entregable/](conocimiento/entregable/) | **[Word Rev.1 — entregado al cliente](conocimiento/entregable/Informe-Tecnico-Comunicacion-OPC-UA-WinCC-RT%20(Rev.1).docx)** · [fuente Markdown](conocimiento/entregable/Informe-Tecnico-Comunicacion-OPC-UA-WinCC-RT.md) · [Word generado (pre-revisión)](conocimiento/entregable/Informe-Tecnico-Comunicacion-OPC-UA-WinCC-RT.docx) · [plantilla IndustrialLAB](conocimiento/entregable/IndustrialLAB-plantilla-informe.docx) |
+| [imagenes/](conocimiento/imagenes/) | Arquitectura OPC UA WinCC–Ignition · listado de alarmas HMI |
+| [resolucion-tecnica/](conocimiento/resolucion-tecnica/) | [Informe de implementación](conocimiento/resolucion-tecnica/OPC-UA-WinCC-RT-Professional-V18.md) · [diagnóstico PowerShell](conocimiento/resolucion-tecnica/OPC-PowerShell-Diagnostico.md) · [chat condensado](conocimiento/resolucion-tecnica/Chat-Resumen-OPC.md) · [chuleta Git](conocimiento/resolucion-tecnica/GitHub-Chuleta.md) · [software TIA V18](conocimiento/resolucion-tecnica/software-instalado.md) |
+| [variables/](conocimiento/variables/) | [Informe de variables](conocimiento/variables/Informe-variables.md) · [tags centrífuga 1](conocimiento/variables/tabla-variables-centrifuga-1.md) · [listado completo Runtime](conocimiento/variables/listado-completo-variables.md) |
 
-## Resultado de referencia (2026-08-18)
+## Resultado de referencia
 
 - **OPC DA:** ProgID `OPCServer.WinCC_SCADA.1` (OPC Expert)
-- **OPC UA:** `opc.tcp://localhost:4861`, servicio `OpcUaServerWinCCPro` (UaExpert + Trust certificate)
+- **OPC UA:** `opc.tcp://192.168.0.221:4861`, servicio `OpcUaServerWinCCPro` (estación de planta); en laboratorio, `opc.tcp://localhost:4861`
 
 ## Nota
 
-Este repositorio es documentación. El push a GitHub lo hace el usuario de forma manual. Comandos: [`conocimiento/GitHub-Chuleta.md`](conocimiento/GitHub-Chuleta.md).
+Este repositorio es documentación. El push a GitHub lo hace el usuario de forma manual. Comandos: [`conocimiento/resolucion-tecnica/GitHub-Chuleta.md`](conocimiento/resolucion-tecnica/GitHub-Chuleta.md).

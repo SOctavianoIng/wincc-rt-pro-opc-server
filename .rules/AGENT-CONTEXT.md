@@ -1,6 +1,6 @@
 # Contexto para un agente de IA — WinCC RT Professional OPC
 
-Usá este archivo **junto con** `OPC-UA-WinCC-RT-Professional-V18.md` (informe técnico validado) y, si el usuario lo pega, el prompt de `AGENT-PROMPT.md`.
+Usá este archivo **junto con** `conocimiento/resolucion-tecnica/OPC-UA-WinCC-RT-Professional-V18.md` (informe técnico validado) y, si el usuario lo pega, el prompt de `.rules/AGENT-PROMPT.md`.
 
 No redescubras el problema desde cero. Esta estación de referencia **ya funciona**. El trabajo típico siguiente es **replicar o diagnosticar otra PC Station** con el mismo patrón.
 
@@ -94,7 +94,7 @@ Estos puntos **ya están comprobados**. En otra estación, verificá si se cumpl
 
 ## 6. Comandos mínimos (copiar del informe si hace falta el bloque completo)
 
-Secuencia cronológica completa (reseña + acción esperada por comando): **`OPC-PowerShell-Diagnostico.md`**.
+Secuencia cronológica completa (reseña + acción esperada por comando): **`conocimiento/resolucion-tecnica/OPC-PowerShell-Diagnostico.md`**.
 
 Ruta base:
 
@@ -108,7 +108,7 @@ netstat -ano | findstr "4861"
 Get-Content "C:\Users\Public\Documents\Siemens\WinCC\OPC\UAServer\OpcUaServerWinCCPro.txt" -Tail 40
 ```
 
-Regenerar certificado: ver sección 11 de `OPC-PowerShell-Diagnostico.md` (o 5.7 del informe).
+Regenerar certificado: ver sección 11 de `conocimiento/resolucion-tecnica/OPC-PowerShell-Diagnostico.md` (o 5.7 del informe).
 
 ---
 
@@ -123,13 +123,23 @@ Regenerar certificado: ver sección 11 de `OPC-PowerShell-Diagnostico.md` (o 5.7
 
 ---
 
-## 8. Archivos de esta carpeta (`conocimiento/`)
+## 8. Mapa de archivos del repositorio
+
+Reglas de agente (esta carpeta: `.rules/`):
+
+| Archivo | Para quién |
+|---|---|
+| `AGENT-CONTEXT.md` | Este archivo: marco mental del agente |
+| `AGENT-PROMPT.md` | Prompt listo para pegar en un chat nuevo |
+
+Resolución técnica (`conocimiento/resolucion-tecnica/`):
 
 | Archivo | Para quién |
 |---|---|
 | `OPC-UA-WinCC-RT-Professional-V18.md` | Humano + agente: cronología, desvíos, comandos |
 | `OPC-PowerShell-Diagnostico.md` | Humano + agente: comandos PS en orden cronológico con reseña |
 | `GitHub-Chuleta.md` | Humano: clone / pull / commit / push de este repo |
-| `AGENT-CONTEXT.md` | Este archivo: marco mental del agente |
-| `AGENT-PROMPT.md` | Prompt listo para pegar en un chat nuevo |
 | `Chat-Resumen-OPC.md` | Transcripción condensada del chat de resolución |
+| `software-instalado.md` | Inventario TIA Portal V18 (estación de laboratorio) |
+
+Entregable al cliente: `conocimiento/entregable/` (Word **Rev.1** = versión entregada). Tags: `conocimiento/variables/`.

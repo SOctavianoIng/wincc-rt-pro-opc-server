@@ -9,12 +9,14 @@
 
 Este archivo **mantiene el hilo** del diálogo (Usuario → Asistente), elimina idas y vueltas repetidas, y deja las consultas mejor redactadas junto con los comandos completos que resolvieron el caso.
 
-Documentos relacionados en esta carpeta:
+Documentos relacionados:
 
-- `OPC-UA-WinCC-RT-Professional-V18.md` — informe técnico estructurado  
-- `OPC-PowerShell-Diagnostico.md` — secuencia de comandos (incluye §12.1 sin Runtime)  
-- `AGENT-CONTEXT.md` — marco para un agente de IA  
-- `AGENT-PROMPT.md` — prompt listo para otra estación  
+- `OPC-UA-WinCC-RT-Professional-V18.md` — informe técnico estructurado (esta carpeta)
+- `OPC-PowerShell-Diagnostico.md` — secuencia de comandos (incluye §12.1 sin Runtime)
+- `.rules/AGENT-CONTEXT.md` — marco para un agente de IA
+- `.rules/AGENT-PROMPT.md` — prompt listo para otra estación
+
+El entregable al cliente está en `conocimiento/entregable/` (Word **Rev.1** = versión entregada).  
 
 **Seguimiento:** §20 (2026-08-25) hilo corto; **§21 (2026-08-25/26)** tutorial — etapa definitiva PC WinCC RT V18 Server OPC UA + cliente remoto KEPServer; **§22 (2026-08-27)** commissioning cliente OPC UA Ignition (SCADA en planta) → WinCC.
 

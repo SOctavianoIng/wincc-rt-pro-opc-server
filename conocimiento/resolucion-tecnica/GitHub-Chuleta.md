@@ -135,7 +135,7 @@ git push origin master
 **Cuándo:** editaste markdowns (u otros archivos) en la PC y querés que queden en la nube.
 
 - `git add -A` — etapa **todos** los cambios de esa carpeta (modificados y archivos nuevos).
-- `git add conocimiento\Chat-Resumen-OPC.md` — etapa **un** archivo (el resto no viaja).
+- `git add conocimiento\resolucion-tecnica\Chat-Resumen-OPC.md` — etapa **un** archivo (el resto no viaja).
 - `git commit` — crea el snapshot **local**. El mensaje va entre comillas. Sin este paso, `push` no lleva el archivo.
 - `git push origin master` — copia esos commits a GitHub.
 - `git pull origin master` **antes** del push si alguien más (u otro agente) ya subió commits.

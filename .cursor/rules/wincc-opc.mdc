@@ -1,0 +1,17 @@
+---
+description: Contexto y protocolo de diagnóstico OPC UA/DA en WinCC RT Professional (estación de referencia ya validada).
+alwaysApply: true
+---
+
+# Agente — WinCC RT Professional OPC
+
+Antes de diagnosticar o proponer reinstalar, leé y tomá como verdad operativa:
+
+- `.rules/AGENT-CONTEXT.md` — hechos cerrados, árbol de decisión, estilo de respuesta
+- `.rules/AGENT-PROMPT.md` — protocolo de sesión (un paso a la vez, evidencia antes de reinstalar)
+
+Documentación de resolución: `conocimiento/resolucion-tecnica/`.
+Entregable al cliente: `conocimiento/entregable/` (la versión entregada es el Word **Rev.1**).
+Tags y listados PLC: `conocimiento/variables/`.
+
+No redescubras el problema desde cero. La PC Station de referencia ya funciona. El cliente OPC lee WinCC, no el PLC (MPI RS-485, S7-315-2DP).

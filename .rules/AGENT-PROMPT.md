@@ -3,9 +3,9 @@
 Copiá **todo** el bloque de abajo a un chat nuevo.  
 Adjuntá o abrí en el workspace:
 
-- `OPC-UA-WinCC-RT-Professional-V18.md`
-- `AGENT-CONTEXT.md`
-- `OPC-PowerShell-Diagnostico.md` (comandos en orden cronológico)
+- `.rules/AGENT-CONTEXT.md`
+- `conocimiento/resolucion-tecnica/OPC-UA-WinCC-RT-Professional-V18.md`
+- `conocimiento/resolucion-tecnica/OPC-PowerShell-Diagnostico.md` (comandos en orden cronológico)
 
 Completá la sección «Estación actual» antes de enviar.
 
@@ -15,9 +15,9 @@ Completá la sección «Estación actual» antes de enviar.
 Sos un agente de diagnóstico e implementación Siemens WinCC / TIA Portal.
 
 ANTES DE RESPONDER: leé y tomá como verdad operativa estos archivos del workspace (o el texto que te adjunte el usuario):
-- AGENT-CONTEXT.md
-- OPC-UA-WinCC-RT-Professional-V18.md
-- OPC-PowerShell-Diagnostico.md (secuencia de comandos PowerShell; un bloque por fase)
+- .rules/AGENT-CONTEXT.md
+- conocimiento/resolucion-tecnica/OPC-UA-WinCC-RT-Professional-V18.md
+- conocimiento/resolucion-tecnica/OPC-PowerShell-Diagnostico.md (secuencia de comandos PowerShell; un bloque por fase)
 
 No reinicies el diagnóstico desde cero como si nada se hubiera comprobado. Ese trabajo ya se hizo en una PC Station de referencia (2026-08-18) y quedó validado.
 
@@ -115,12 +115,12 @@ Luego dame UN solo siguiente comando o clic, no una lista de diez caminos.
 
 ## Cómo usarlo en Cursor
 
-1. Abrí el repo `wincc-rt-pro-opc-server` (carpeta `conocimiento/`) o adjuntá los `.md`.
+1. Abrí el repo `wincc-rt-pro-opc-server` (carpetas `.rules/` y `conocimiento/resolucion-tecnica/`) o adjuntá los `.md`.
 2. Chat nuevo → pegá el bloque de arriba con «Estación actual» completa.
-3. El agente debe leer `AGENT-CONTEXT.md`, el informe y `OPC-PowerShell-Diagnostico.md` **antes** de diagnosticar.
-4. Opcional: `Chat-Resumen-OPC.md` si necesita el hilo narrativo completo.
+3. El agente debe leer `.rules/AGENT-CONTEXT.md`, el informe de resolución y `conocimiento/resolucion-tecnica/OPC-PowerShell-Diagnostico.md` **antes** de diagnosticar.
+4. Opcional: `conocimiento/resolucion-tecnica/Chat-Resumen-OPC.md` si necesita el hilo narrativo completo.
 5. Al pedir un comando, preferir el bloque de la fase correspondiente en `OPC-PowerShell-Diagnostico.md` (reseña + acción esperada).
 
 ## Cómo usarlo en otro LLM (ChatGPT, etc.)
 
-Pegá el prompt y, debajo, el contenido de `AGENT-CONTEXT.md` + las secciones 1, 3, 4 y 5 del informe si el modelo no puede abrir archivos.
+Pegá el prompt y, debajo, el contenido de `.rules/AGENT-CONTEXT.md` + las secciones 1, 3, 4 y 5 del informe de resolución si el modelo no puede abrir archivos.
